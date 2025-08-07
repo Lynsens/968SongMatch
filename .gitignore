@@ -34,3 +34,5 @@ test_audio/
 
 # Logs
 *.log
+
+songs/

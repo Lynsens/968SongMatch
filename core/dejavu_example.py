@@ -7,9 +7,9 @@ This program demonstrates how to use Dejavu for audio fingerprinting and recogni
 import json
 import warnings
 from pathlib import Path
-from dejavu import Dejavu
-from dejavu.logic.recognizer.file_recognizer import FileRecognizer
-from dejavu.logic.recognizer.microphone_recognizer import MicrophoneRecognizer
+from dejavu_lib import Dejavu
+from dejavu_lib.logic.recognizer.file_recognizer import FileRecognizer
+from dejavu_lib.logic.recognizer.microphone_recognizer import MicrophoneRecognizer
 
 warnings.filterwarnings("ignore")
 
@@ -59,16 +59,45 @@ class AudioFingerprinter:
             Recognition results dictionary
         """
         print(f"Recognizing: {filepath}")
-        results = self.djv.recognize(FileRecognizer, filepath)
+        raw_results = self.djv.recognize(FileRecognizer, filepath)
         
-        if results and results['song_name']:
-            print(f"✓ Match found: {results['song_name']}")
+        if raw_results and raw_results.get('results') and len(raw_results['results']) > 0:
+            # Get the best match (first result)
+            best_match = raw_results['results'][0]
+            
+            # Decode song name from bytes if needed
+            song_name = best_match['song_name']
+            if isinstance(song_name, bytes):
+                song_name = song_name.decode('utf-8')
+            elif isinstance(song_name, str) and song_name.startswith("b'"):
+                # Handle string representation of bytes
+                try:
+                    song_name = eval(song_name).decode('utf-8')
+                except:
+                    pass
+            
+            # Create unified results format
+            results = {
+                'song_name': song_name,
+                'song_id': best_match['song_id'],
+                'input_confidence': best_match['input_confidence'],
+                'fingerprinted_confidence': best_match['fingerprinted_confidence'],
+                'offset_seconds': float(best_match['offset_seconds']),
+                'hashes_matched_in_input': best_match['hashes_matched_in_input'],
+                'input_total_hashes': best_match['input_total_hashes'],
+                'fingerprinted_hashes_in_db': best_match['fingerprinted_hashes_in_db'],
+                'total_time': raw_results['total_time'],
+                'query_time': raw_results['query_time']
+            }
+            
+            print(f"✓ Match found: {song_name}")
             print(f"  Confidence: {results['input_confidence']:.2%}")
             print(f"  Offset: {results['offset_seconds']:.2f} seconds")
+            
+            return results
         else:
             print("✗ No match found")
-        
-        return results
+            return None
     
     def recognize_microphone(self, seconds=10):
         """
@@ -81,15 +110,47 @@ class AudioFingerprinter:
             Recognition results dictionary
         """
         print(f"Listening for {seconds} seconds...")
-        results = self.djv.recognize(MicrophoneRecognizer, seconds=seconds)
+        raw_results = self.djv.recognize(MicrophoneRecognizer, seconds=seconds)
         
-        if results and results['song_name']:
-            print(f"✓ Match found: {results['song_name']}")
-            print(f"  Confidence: {results['input_confidence']:.2%}")
+        # Handle tuple format from microphone recognizer
+        if raw_results and isinstance(raw_results, tuple) and len(raw_results) >= 4:
+            match_list, total_time, query_time, align_time = raw_results
+            if match_list and len(match_list) > 0:
+                # Get the best match (first result)
+                best_match = match_list[0]
+                
+                # Decode song name from bytes if needed
+                song_name = best_match['song_name']
+                if isinstance(song_name, bytes):
+                    song_name = song_name.decode('utf-8')
+                elif isinstance(song_name, str) and song_name.startswith("b'"):
+                    # Handle string representation of bytes
+                    try:
+                        song_name = eval(song_name).decode('utf-8')
+                    except:
+                        pass
+                
+                # Create unified results format
+                results = {
+                    'song_name': song_name,
+                    'song_id': best_match['song_id'],
+                    'input_confidence': best_match['input_confidence'],
+                    'fingerprinted_confidence': best_match['fingerprinted_confidence'],
+                    'offset_seconds': float(best_match['offset_seconds']),
+                    'hashes_matched_in_input': best_match['hashes_matched_in_input'],
+                    'input_total_hashes': best_match['input_total_hashes'],
+                    'fingerprinted_hashes_in_db': best_match['fingerprinted_hashes_in_db'],
+                    'total_time': float(total_time),
+                    'query_time': float(query_time)
+                }
+                
+                print(f"✓ Match found: {song_name}")
+                print(f"  Confidence: {results['input_confidence']:.2%}")
+                
+                return results
         else:
             print("✗ No match found")
-        
-        return results
+            return None
     
     def get_database_stats(self):
         """Get statistics about the fingerprint database."""

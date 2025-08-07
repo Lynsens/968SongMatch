@@ -2,6 +2,8 @@
 
 An audio fingerprinting and recognition system using the Dejavu library, capable of identifying songs from audio samples similar to Shazam.
 
+> **Note**: This project has been updated to work with Python 3.13+, which requires special handling for the deprecated `audioop` module.
+
 ## Features
 
 - **Audio Fingerprinting**: Create unique fingerprints for audio files
@@ -27,6 +29,8 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 2. **Install dependencies**:
 ```bash
 pip install -r requirements.txt
+# For Python 3.13+, also install:
+pip install audioop-lts
 ```
 
 3. **Install FFmpeg** (required for audio processing):
@@ -51,6 +55,16 @@ Edit `dejavu_config.json` with your MySQL credentials:
     }
 }
 ```
+
+## Quick Demo (No Database Required)
+
+Run the demo to see audio fingerprinting in action:
+
+```bash
+python dejavu_demo.py
+```
+
+This will generate a sample audio signal, compute its fingerprints, and create a visualization showing the fingerprinting process.
 
 ## Usage
 

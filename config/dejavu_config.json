@@ -1,8 +1,8 @@
 {
     "database": {
-        "host": "localhost",
-        "user": "root",
-        "password": "password",
+        "host": "49.234.22.169",
+        "user": "jlg",
+        "password": "jlg88888888",
         "database": "dejavu"
     },
     "database_type": "mysql",

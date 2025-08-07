@@ -1,0 +1,54 @@
+{
+  "test_session": {
+    "timestamp": "2025-08-07 21:54:22",
+    "total_tests": 3,
+    "matches": 3,
+    "timeouts": 0,
+    "config_file": "dejavu_config.json",
+    "max_listen_time": 3.0
+  },
+  "results": [
+    {
+      "source": "audio_slices/\u5b89\u9759_slice_2_114.0s.wav",
+      "source_type": "file",
+      "matched": true,
+      "song_name": "\u5b89\u9759",
+      "confidence": 0.62,
+      "processing_time": 0.9269909858703613,
+      "timestamp": "2025-08-07 21:54:19",
+      "song_id": 11,
+      "offset_seconds": 114.05642,
+      "hashes_matched": 2319,
+      "input_hashes": 3743,
+      "fingerprinted_hashes": 111724
+    },
+    {
+      "source": "audio_slices/\u5b89\u9759_slice_1_92.5s.wav",
+      "source_type": "file",
+      "matched": true,
+      "song_name": "\u5b89\u9759",
+      "confidence": 0.66,
+      "processing_time": 1.4926071166992188,
+      "timestamp": "2025-08-07 21:54:21",
+      "song_id": 11,
+      "offset_seconds": 92.46186,
+      "hashes_matched": 2202,
+      "input_hashes": 3324,
+      "fingerprinted_hashes": 111724
+    },
+    {
+      "source": "audio_slices/\u5b89\u9759_slice_3_169.7s.wav",
+      "source_type": "file",
+      "matched": true,
+      "song_name": "\u5b89\u9759",
+      "confidence": 1.57,
+      "processing_time": 1.1416599750518799,
+      "timestamp": "2025-08-07 21:54:22",
+      "song_id": 11,
+      "offset_seconds": 169.69143,
+      "hashes_matched": 6519,
+      "input_hashes": 4163,
+      "fingerprinted_hashes": 111724
+    }
+  ]
+}

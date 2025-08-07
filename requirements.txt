@@ -1,7 +1,13 @@
-PyDejavu==0.1.3
-numpy==2.3.2
-scipy==1.16.1
-matplotlib==3.10.5
-pydub==0.25.1
-pymysql==1.1.1
-pyaudio==0.2.14  # Optional: for microphone recognition
+# Core dependencies
+numpy>=1.26.0
+scipy>=1.11.0
+matplotlib>=3.7.0
+pydub>=0.25.1
+audioop-lts>=0.2.0  # Required for Python 3.13+
+
+# Database connectors (choose one)
+mysql-connector-python>=8.0.0  # For MySQL
+# psycopg2>=2.9.0  # For PostgreSQL
+
+# Optional: for microphone recognition
+pyaudio>=0.2.14
