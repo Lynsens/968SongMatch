@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Audio Recognition - Dejavu{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="text-center mb-4">
+            <h1 class="display-4">
+                <i class="fas fa-music text-primary me-3"></i>
+                Audio Recognition
+            </h1>
+            <p class="lead text-muted">
+                Upload an audio file to identify the song using Dejavu fingerprinting
+            </p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-upload me-2"></i>Upload Audio File
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="recognizeForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <div class="drop-zone" id="dropZone">
+                            <div class="drop-zone-content">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                <h5>Drag & drop your audio file here</h5>
+                                <p class="text-muted">or click to browse</p>
+                                <input type="file" id="audioFile" name="file" accept=".mp3,.wav,.flac,.m4a,.ogg" class="d-none">
+                                <button type="button" class="btn btn-outline-primary">
+                                    Choose File
+                                </button>
+                            </div>
+                        </div>
+                        <small class="form-text text-muted">
+                            Supported formats: MP3, WAV, FLAC, M4A, OGG (Max: 50MB)
+                        </small>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="recognizeBtn">
+                            <i class="fas fa-search me-2"></i>Recognize Song
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="card shadow-sm mb-4" id="progressCard" style="display: none;">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="spinner-border text-primary me-3" role="status">
+                        <span class="visually-hidden">Processing...</span>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">Processing audio file...</h6>
+                        <small class="text-muted">This may take a few seconds</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="card shadow-sm" id="resultsCard" style="display: none;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-search-plus me-2"></i>Recognition Results
+                </h5>
+                <button type="button" class="btn-close" onclick="hideResults()"></button>
+            </div>
+            <div class="card-body" id="resultsContent">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+
+        <!-- Quick Test Section -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-vial me-2"></i>Quick Test
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <button type="button" class="btn btn-outline-info w-100" onclick="showCreateSlices()">
+                            <i class="fas fa-cut me-2"></i>Create Audio Slices
+                        </button>
+                        <small class="form-text text-muted">Create audio slices for testing</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Slices Modal -->
+<div class="modal fade" id="createSlicesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Audio Slices</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createSlicesForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="sliceFile" class="form-label">Audio File</label>
+                        <input type="file" class="form-control" id="sliceFile" name="file" accept=".mp3,.wav,.flac,.m4a,.ogg" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="sliceDuration" class="form-label">Duration (seconds)</label>
+                            <input type="number" class="form-control" id="sliceDuration" name="duration" value="10" min="5" max="30">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sliceCount" class="form-label">Number of slices</label>
+                            <input type="number" class="form-control" id="sliceCount" name="count" value="5" min="1" max="10">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createSlices()">
+                    <i class="fas fa-cut me-2"></i>Create Slices
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/recognize_simple.js') }}"></script>
+{% endblock %}

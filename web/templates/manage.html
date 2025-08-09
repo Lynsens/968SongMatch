@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Database Management - Dejavu{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="text-center mb-4">
+            <h1 class="display-4">
+                <i class="fas fa-database text-primary me-3"></i>
+                Database Management
+            </h1>
+            <p class="lead text-muted">
+                Manage your music library and database statistics
+            </p>
+        </div>
+
+        <!-- Database Stats -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Database Statistics
+                </h5>
+                <button class="btn btn-light btn-sm" onclick="refreshStats()" 
+                        title="Refresh statistics (Alt+S)">
+                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row" id="statsRow">
+                    <div class="col-md-4 text-center">
+                        <div class="stat-item p-3 border-end">
+                            <i class="fas fa-music fa-2x text-primary mb-2"></i>
+                            <h3 class="mb-1" id="songsCount">--</h3>
+                            <p class="text-muted mb-0">Songs in Library</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="stat-item p-3 border-end">
+                            <i class="fas fa-fingerprint fa-2x text-success mb-2"></i>
+                            <h3 class="mb-1" id="fingerprintsCount">--</h3>
+                            <p class="text-muted mb-0">Audio Fingerprints</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="stat-item p-3">
+                            <i class="fas fa-server fa-2x text-warning mb-2"></i>
+                            <h3 class="mb-1" id="statusIcon">
+                                <i class="fas fa-circle text-secondary"></i>
+                            </h3>
+                            <p class="text-muted mb-0">Database Status</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Songs Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-plus me-2"></i>Add Songs to Database
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Tip:</strong> Adding songs creates audio fingerprints for recognition. 
+                    Larger files will take longer to process.
+                </div>
+                
+                <form id="addSongsForm" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-file-audio me-1"></i>Choose Upload Method
+                        </label>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-files-o fa-2x text-primary mb-2"></i>
+                                        <h6>Select Individual Files</h6>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" id="selectFilesBtn">
+                                            <i class="fas fa-file-audio me-1"></i>Choose Files
+                                        </button>
+                                        <input type="file" class="d-none" id="musicFiles" name="files" multiple accept=".mp3,.wav,.flac,.m4a,.ogg">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-folder-open fa-2x text-success mb-2"></i>
+                                        <h6>Select Entire Folder</h6>
+                                        <button type="button" class="btn btn-outline-success btn-sm" id="selectFolderBtn">
+                                            <i class="fas fa-folder me-1"></i>Choose Folder
+                                        </button>
+                                        <input type="file" class="d-none" id="musicFolder" name="folder" webkitdirectory multiple accept=".mp3,.wav,.flac,.m4a,.ogg">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-light border">
+                            <div class="row text-sm">
+                                <div class="col-md-6">
+                                    <i class="fas fa-check me-1 text-success"></i>
+                                    <strong>Supported formats:</strong> MP3, WAV, FLAC, M4A, OGG
+                                </div>
+                                <div class="col-md-6">
+                                    <i class="fas fa-info me-1 text-info"></i>
+                                    <strong>File limit:</strong> 50MB per individual file
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4" id="fileList" style="display: none;">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-list me-1"></i>Files to process:
+                        </label>
+                        <div class="border rounded p-3 bg-light" id="fileListContent">
+                            <!-- File list will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg" id="addSongsBtn">
+                            <i class="fas fa-plus me-2"></i>Add Songs to Database
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="card shadow-sm mb-4" id="addProgressCard" style="display: none;">
+            <div class="card-header">
+                <h6 class="mb-0">Adding Songs to Database</h6>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-3" style="height: 25px; position: relative;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%" id="addProgressBar"></div>
+                    <span id="progressBarText" style="position: absolute; width: 100%; left: 0; top: 0; line-height: 25px; text-align: center; color: black; font-weight: bold; text-shadow: 0 0 3px white;">0%</span>
+                </div>
+                <div id="addProgressText" class="text-center">
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    <span id="progressStatus">Processing...</span>
+                </div>
+                <div id="currentFileInfo" class="mt-2 text-muted small text-center" style="display: none;">
+                    Currently processing: <strong id="currentFileName"></strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="card shadow-sm" id="addResultsCard" style="display: none;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-check-circle me-2"></i>Results
+                </h5>
+                <button type="button" class="btn-close" onclick="hideAddResults()"></button>
+            </div>
+            <div class="card-body" id="addResultsContent">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+
+        <!-- Song Library Management -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-music me-2"></i>Song Library
+                </h5>
+                <button class="btn btn-light btn-sm" onclick="loadSongLibrary()"
+                        title="Refresh song library (Alt+L)">
+                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" id="songSearch" placeholder="Search songs..." onkeyup="filterSongs()">
+                    </div>
+                    <div class="col-md-4">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog me-1"></i>Actions
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="selectAllSongs()">
+                                    <i class="fas fa-check-square me-2"></i>Select All
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="clearSelection()">
+                                    <i class="fas fa-square me-2"></i>Clear Selection
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteSelectedSongs()">
+                                    <i class="fas fa-trash me-2"></i>Delete Selected
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="songLibraryContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Loading song library...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Operations -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-database me-2"></i>Database Operations
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-danger">
+                            <div class="card-body text-center">
+                                <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                                <h6 class="text-danger">Danger Zone</h6>
+                                <p class="small text-muted">Permanently delete all songs and fingerprints from the database</p>
+                                <button class="btn btn-outline-danger btn-sm" onclick="confirmClearDatabase()">
+                                    <i class="fas fa-trash-alt me-1"></i>Clear Entire Database
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="deleteModalBody">
+                <!-- Content will be populated dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" onclick="executeDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/manage.js') }}?v=20250808-4"></script>
+{% endblock %}

@@ -1,6 +1,6 @@
 # Dejavu Audio Fingerprinting Project
 
-An audio fingerprinting and recognition system using the Dejavu library, capable of identifying songs from audio samples similar to Shazam.
+An audio fingerprinting and recognition system using the Dejavu library, capable of identifying songs from audio samples similar to Shazam. Now with a modern web interface for easy interaction!
 
 > **Note**: This project has been updated to work with Python 3.13+, which requires special handling for the deprecated `audioop` module.
 
@@ -8,15 +8,20 @@ An audio fingerprinting and recognition system using the Dejavu library, capable
 
 - **Audio Fingerprinting**: Create unique fingerprints for audio files
 - **Song Recognition**: Identify unknown audio samples against a database
+- **Web Interface**: Modern, responsive web UI for all operations
+- **Live Recognition Sessions**: Real-time progressive confidence display during recognition
 - **Batch Processing**: Fingerprint entire directories of music
 - **Microphone Recognition**: Real-time audio recognition from microphone input
 - **Database Storage**: Persistent storage of audio fingerprints using MySQL
+- **Audio Slicing**: Create test slices from audio files for testing
+- **Recognition History**: Track all recognition attempts and results
 
 ## Prerequisites
 
 - Python 3.8+
 - MySQL Server (for fingerprint storage)
 - FFmpeg (for audio processing)
+- Modern web browser (Chrome, Firefox, Safari, Edge)
 
 ## Installation
 
@@ -31,6 +36,8 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 # For Python 3.13+, also install:
 pip install audioop-lts
+# For web interface:
+pip install flask flask-cors flask-socketio
 ```
 
 3. **Install FFmpeg** (required for audio processing):
@@ -68,7 +75,29 @@ This will generate a sample audio signal, compute its fingerprints, and create a
 
 ## Usage
 
-### Basic Example
+### Web Interface (Recommended)
+
+Start the web server:
+
+```bash
+python web_server.py
+```
+
+Then open your browser and navigate to:
+- **Home**: http://localhost:8000/ - Upload audio files for recognition
+- **Live Session**: http://localhost:8000/live - Real-time microphone recognition with progressive confidence
+- **Database Management**: http://localhost:8000/manage - Add/remove songs from database
+- **History**: http://localhost:8000/history - View recognition history
+
+#### Live Recognition Features:
+- **Session-based recognition**: Start/stop recognition sessions
+- **Progressive confidence**: Watch confidence levels build in real-time (30% → 60% → 90%)
+- **5-second listening window**: Automatic stop after 5 seconds
+- **Audio level monitoring**: Visual feedback of microphone input
+- **Recognition timer**: Track how long each recognition takes
+- **Session history**: Review all recognition attempts in the session
+
+### Command Line Interface
 
 ```python
 from dejavu_example import AudioFingerprinter
@@ -131,11 +160,27 @@ The `dejavu_config.json` file contains:
 
 ```
 dejavu/
-├── venv/                    # Python virtual environment
-├── dejavu_example.py        # Main program with AudioFingerprinter class
-├── dejavu_config.json       # Configuration file
-├── requirements.txt         # Python dependencies
-└── README.md               # This file
+├── core/                    # Core Dejavu functionality
+│   ├── __init__.py
+│   └── quick_start.py       # Quick start wrapper for Dejavu
+├── tools/                   # Utility tools
+│   ├── __init__.py
+│   ├── audio_tester.py      # Audio recognition testing
+│   └── audio_slicer.py      # Audio slice generation
+├── web/                     # Web interface
+│   ├── app.py              # Flask web server
+│   ├── static/             # Static assets (CSS, JS, uploads)
+│   │   ├── css/
+│   │   └── js/
+│   └── templates/          # HTML templates
+├── config/                  # Configuration files
+│   └── dejavu_config.json  # Database configuration
+├── data/                    # Data storage
+│   ├── songs/              # Audio files library
+│   └── audio_slices/       # Test audio slices
+├── web_server.py           # Web server launcher
+├── requirements.txt        # Python dependencies
+└── README.md              # This file
 ```
 
 ## Troubleshooting
