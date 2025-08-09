@@ -1,9 +1,11 @@
 {
     "database": {
-        "host": "49.234.22.169",
-        "user": "jlg",
-        "password": "jlg88888888",
-        "database": "dejavu"
+        "host": "localhost",
+        "user": "root",
+        "password": "Aabbc!1223",
+        "database": "dejavu",
+        "connect_timeout": 10,
+        "autocommit": true
     },
     "database_type": "mysql",
     "fingerprint": {

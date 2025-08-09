@@ -1,0 +1,521 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Dejavu Audio Recognition{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <h2 class="mb-4">
+                <i class="fas fa-cog me-2"></i>Recognition Settings
+            </h2>
+            
+            <!-- Recognition Settings Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-microphone me-2"></i>Live Recognition Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="settingsForm">
+                        <div class="mb-4">
+                            <label for="listenDuration" class="form-label">
+                                <strong>Recognition Duration</strong>
+                                <small class="text-muted d-block">How long to listen for each song</small>
+                            </label>
+                            <select class="form-select form-select-lg" id="listenDuration">
+                                <option value="3">3 seconds - Quick test</option>
+                                <option value="5" selected>5 seconds - Standard (Recommended)</option>
+                                <option value="10">10 seconds - Better accuracy</option>
+                                <option value="15">15 seconds - High accuracy</option>
+                                <option value="30">30 seconds - Maximum accuracy</option>
+                            </select>
+                            <div class="form-text">
+                                Longer durations provide better recognition accuracy but take more time.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <strong>Recognition Frequency</strong>
+                                <small class="text-muted d-block">How often to run recognition (currently fixed at 0.5s)</small>
+                            </label>
+                            <input type="text" class="form-control" value="Every 0.5 seconds" disabled>
+                            <div class="form-text">
+                                Recognition runs every 0.5 seconds on accumulated audio for progressive results.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <strong>Confidence Threshold</strong>
+                                <small class="text-muted d-block">Minimum confidence to display results</small>
+                            </label>
+                            <div class="input-group">
+                                <input type="range" class="form-range" id="confidenceThreshold" 
+                                       min="10" max="50" value="10" step="5">
+                                <span class="input-group-text" id="confidenceValue">10%</span>
+                            </div>
+                            <div class="form-text">
+                                Songs below this confidence won't be shown in results.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <strong>Maximum Results</strong>
+                                <small class="text-muted d-block">Number of possible songs to display</small>
+                            </label>
+                            <select class="form-select" id="maxResults">
+                                <option value="3">Top 3 matches</option>
+                                <option value="5" selected>Top 5 matches</option>
+                                <option value="10">Top 10 matches</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Save Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Microphone Settings Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-microphone-alt me-2"></i>Microphone Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="microphoneForm">
+                        <div class="mb-4">
+                            <label for="microphoneSelect" class="form-label">
+                                <strong>Input Device</strong>
+                                <small class="text-muted d-block">Select your microphone or audio input device</small>
+                            </label>
+                            <select class="form-select form-select-lg" id="microphoneSelect">
+                                <option value="">Loading available devices...</option>
+                            </select>
+                            <div class="form-text">
+                                Make sure to grant microphone permissions when prompted by your browser.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <strong>Input Gain</strong>
+                                <small class="text-muted d-block">Adjust microphone sensitivity</small>
+                            </label>
+                            <div class="input-group">
+                                <input type="range" class="form-range" id="inputGain" 
+                                       min="0.1" max="2.0" value="1.0" step="0.1">
+                                <span class="input-group-text" id="gainValue">1.0x</span>
+                            </div>
+                            <div class="form-text">
+                                Increase if audio is too quiet, decrease if there's distortion.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <strong>Audio Quality</strong>
+                                <small class="text-muted d-block">Recording quality settings</small>
+                            </label>
+                            <select class="form-select" id="audioQuality">
+                                <option value="8000">8 kHz - Phone quality (faster)</option>
+                                <option value="16000">16 kHz - Voice quality</option>
+                                <option value="44100" selected>44.1 kHz - CD quality (recommended)</option>
+                                <option value="48000">48 kHz - Studio quality</option>
+                            </select>
+                            <div class="form-text">
+                                Higher quality provides better recognition but uses more bandwidth.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <strong>Noise Reduction</strong>
+                                <small class="text-muted d-block">Filter out background noise</small>
+                            </label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="noiseReduction" checked>
+                                <label class="form-check-label" for="noiseReduction">
+                                    Enable noise reduction (recommended)
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                Helps improve recognition in noisy environments.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <strong>Auto Gain Control</strong>
+                                <small class="text-muted d-block">Automatically adjust volume levels</small>
+                            </label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="autoGainControl" checked>
+                                <label class="form-check-label" for="autoGainControl">
+                                    Enable automatic gain control
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                Automatically normalizes audio input levels.
+                            </div>
+                        </div>
+                        
+                        <!-- Microphone Test Section -->
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <strong>Test Microphone</strong>
+                                <small class="text-muted d-block">Check if your microphone is working</small>
+                            </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <button type="button" class="btn btn-outline-primary" id="testMicBtn">
+                                    <i class="fas fa-play me-2"></i>Start Test
+                                </button>
+                                <div class="flex-grow-1">
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-success" id="audioLevelBar" 
+                                             role="progressbar" style="width: 0%" 
+                                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-text">
+                                Speak or play music to see the audio level indicator.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save me-2"></i>Save Microphone Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Info Card -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>About Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>These settings are saved locally in your browser and will be remembered for future sessions.</p>
+                    <ul>
+                        <li><strong>Recognition Duration:</strong> Affects how long the system listens before stopping automatically</li>
+                        <li><strong>Confidence Threshold:</strong> Lower values show more possible matches, higher values show only confident matches</li>
+                        <li><strong>Maximum Results:</strong> Controls how many songs are displayed in the ranked list</li>
+                        <li><strong>Input Device:</strong> Select which microphone to use for audio input</li>
+                        <li><strong>Input Gain:</strong> Adjust microphone sensitivity (1.0x is normal, higher values amplify)</li>
+                        <li><strong>Audio Quality:</strong> Higher sample rates provide better recognition but use more processing power</li>
+                        <li><strong>Noise Reduction:</strong> Helps filter out background noise for cleaner audio input</li>
+                        <li><strong>Auto Gain Control:</strong> Automatically normalizes volume levels to prevent distortion</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load saved settings
+document.addEventListener('DOMContentLoaded', function() {
+    // Load duration
+    const savedDuration = localStorage.getItem('preferredListenDuration');
+    if (savedDuration) {
+        document.getElementById('listenDuration').value = savedDuration;
+    }
+    
+    // Load confidence threshold
+    const savedThreshold = localStorage.getItem('confidenceThreshold');
+    if (savedThreshold) {
+        document.getElementById('confidenceThreshold').value = savedThreshold;
+        document.getElementById('confidenceValue').textContent = savedThreshold + '%';
+    }
+    
+    // Load max results
+    const savedMaxResults = localStorage.getItem('maxResults');
+    if (savedMaxResults) {
+        document.getElementById('maxResults').value = savedMaxResults;
+    }
+    
+    // Update confidence value display
+    document.getElementById('confidenceThreshold').addEventListener('input', function(e) {
+        document.getElementById('confidenceValue').textContent = e.target.value + '%';
+    });
+    
+    // Handle form submission
+    document.getElementById('settingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Save all settings
+        localStorage.setItem('preferredListenDuration', document.getElementById('listenDuration').value);
+        localStorage.setItem('confidenceThreshold', document.getElementById('confidenceThreshold').value);
+        localStorage.setItem('maxResults', document.getElementById('maxResults').value);
+        
+        // Show success message
+        showSuccessAlert('Settings saved successfully!');
+    });
+    
+    // Initialize microphone settings
+    initMicrophoneSettings();
+});
+
+// Microphone settings functionality
+let currentStream = null;
+let audioContext = null;
+let analyser = null;
+let currentGainNode = null;
+let isTestingMic = false;
+
+async function initMicrophoneSettings() {
+    // Load saved microphone settings
+    loadMicrophoneSettings();
+    
+    // Set up event listeners
+    document.getElementById('inputGain').addEventListener('input', function(e) {
+        const gainValue = parseFloat(e.target.value);
+        document.getElementById('gainValue').textContent = gainValue + 'x';
+        
+        // Update gain in real-time during testing
+        if (isTestingMic && currentGainNode) {
+            currentGainNode.gain.value = gainValue;
+            console.log(`Updated gain to: ${gainValue}x`);
+        }
+    });
+    
+    // Load available audio devices
+    await loadAudioDevices();
+    
+    // Handle microphone form submission
+    document.getElementById('microphoneForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveMicrophoneSettings();
+    });
+    
+    // Handle microphone test
+    document.getElementById('testMicBtn').addEventListener('click', toggleMicrophoneTest);
+}
+
+function loadMicrophoneSettings() {
+    // Load saved values from localStorage
+    const savedGain = localStorage.getItem('micInputGain');
+    if (savedGain) {
+        document.getElementById('inputGain').value = savedGain;
+        document.getElementById('gainValue').textContent = savedGain + 'x';
+    }
+    
+    const savedQuality = localStorage.getItem('micAudioQuality');
+    if (savedQuality) {
+        document.getElementById('audioQuality').value = savedQuality;
+    }
+    
+    const savedNoiseReduction = localStorage.getItem('micNoiseReduction');
+    if (savedNoiseReduction !== null) {
+        document.getElementById('noiseReduction').checked = savedNoiseReduction === 'true';
+    }
+    
+    const savedAutoGain = localStorage.getItem('micAutoGainControl');
+    if (savedAutoGain !== null) {
+        document.getElementById('autoGainControl').checked = savedAutoGain === 'true';
+    }
+    
+    const savedDeviceId = localStorage.getItem('micDeviceId');
+    if (savedDeviceId) {
+        // Will be set after devices are loaded
+        setTimeout(() => {
+            document.getElementById('microphoneSelect').value = savedDeviceId;
+        }, 1000);
+    }
+}
+
+async function loadAudioDevices() {
+    try {
+        // Request permissions first
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop()); // Stop the stream immediately
+        
+        // Get all audio input devices
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs = devices.filter(device => device.kind === 'audioinput');
+        
+        const select = document.getElementById('microphoneSelect');
+        select.innerHTML = '';
+        
+        if (audioInputs.length === 0) {
+            select.innerHTML = '<option value="">No microphones found</option>';
+            return;
+        }
+        
+        // Add default option
+        select.innerHTML = '<option value="default">Default Microphone</option>';
+        
+        // Add each device
+        audioInputs.forEach(device => {
+            const option = document.createElement('option');
+            option.value = device.deviceId;
+            option.textContent = device.label || `Microphone ${device.deviceId.substr(0, 8)}...`;
+            select.appendChild(option);
+        });
+        
+        // Set saved device if available
+        const savedDeviceId = localStorage.getItem('micDeviceId');
+        if (savedDeviceId) {
+            select.value = savedDeviceId;
+        }
+        
+    } catch (error) {
+        console.error('Error loading audio devices:', error);
+        document.getElementById('microphoneSelect').innerHTML = '<option value="">Permission denied or no microphones</option>';
+    }
+}
+
+function saveMicrophoneSettings() {
+    // Save all microphone settings
+    localStorage.setItem('micDeviceId', document.getElementById('microphoneSelect').value);
+    localStorage.setItem('micInputGain', document.getElementById('inputGain').value);
+    localStorage.setItem('micAudioQuality', document.getElementById('audioQuality').value);
+    localStorage.setItem('micNoiseReduction', document.getElementById('noiseReduction').checked);
+    localStorage.setItem('micAutoGainControl', document.getElementById('autoGainControl').checked);
+    
+    showSuccessAlert('Microphone settings saved successfully!');
+}
+
+async function toggleMicrophoneTest() {
+    const btn = document.getElementById('testMicBtn');
+    const levelBar = document.getElementById('audioLevelBar');
+    
+    if (isTestingMic) {
+        // Stop test
+        stopMicrophoneTest();
+        btn.innerHTML = '<i class="fas fa-play me-2"></i>Start Test';
+        btn.className = 'btn btn-outline-primary';
+        levelBar.style.width = '0%';
+        isTestingMic = false;
+    } else {
+        // Start test
+        try {
+            isTestingMic = true;
+            await startMicrophoneTest();
+            btn.innerHTML = '<i class="fas fa-stop me-2"></i>Stop Test';
+            btn.className = 'btn btn-outline-danger';
+        } catch (error) {
+            console.error('Error starting microphone test:', error);
+            isTestingMic = false;
+            alert('Could not start microphone test. Please check your microphone permissions.');
+        }
+    }
+}
+
+async function startMicrophoneTest() {
+    const deviceId = document.getElementById('microphoneSelect').value;
+    const sampleRate = parseInt(document.getElementById('audioQuality').value);
+    const noiseReduction = document.getElementById('noiseReduction').checked;
+    const autoGainControl = document.getElementById('autoGainControl').checked;
+    
+    const constraints = {
+        audio: {
+            deviceId: deviceId === 'default' ? undefined : { exact: deviceId },
+            sampleRate: sampleRate,
+            noiseSuppression: noiseReduction,
+            autoGainControl: autoGainControl,
+            echoCancellation: true
+        }
+    };
+    
+    currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+    audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate });
+    
+    // Resume audio context if suspended
+    if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+    }
+    
+    analyser = audioContext.createAnalyser();
+    
+    // Create gain node for input gain control
+    currentGainNode = audioContext.createGain();
+    const inputGain = parseFloat(document.getElementById('inputGain').value);
+    currentGainNode.gain.value = inputGain;
+    
+    const source = audioContext.createMediaStreamSource(currentStream);
+    source.connect(currentGainNode);
+    currentGainNode.connect(analyser);
+    
+    analyser.fftSize = 1024;
+    const bufferLength = analyser.fftSize;
+    const dataArray = new Uint8Array(bufferLength);
+    
+    // Start audio level monitoring
+    function updateAudioLevel() {
+        if (!isTestingMic) return;
+        
+        // Use time domain data for actual amplitude (audio level)
+        analyser.getByteTimeDomainData(dataArray);
+        
+        // Calculate RMS (Root Mean Square) for proper audio level
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+            const normalized = (dataArray[i] - 128) / 128; // Convert to -1 to 1 range
+            sum += normalized * normalized;
+        }
+        const rms = Math.sqrt(sum / bufferLength);
+        const percentage = Math.min(100, rms * 300); // Scale up for better visibility
+        
+        // Update visual indicator
+        const levelBar = document.getElementById('audioLevelBar');
+        if (!levelBar) return;
+        
+        levelBar.style.width = percentage + '%';
+        levelBar.setAttribute('aria-valuenow', percentage);
+        
+        // Change color based on level
+        const colorClass = percentage > 80 ? 'bg-danger' : 
+                          percentage > 50 ? 'bg-warning' : 'bg-success';
+        levelBar.className = 'progress-bar ' + colorClass;
+        
+        requestAnimationFrame(updateAudioLevel);
+    }
+    
+    updateAudioLevel();
+}
+
+function stopMicrophoneTest() {
+    if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+        currentStream = null;
+    }
+    if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+    }
+    analyser = null;
+    currentGainNode = null;
+}
+
+function showSuccessAlert(message) {
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+    alert.style.zIndex = '9999';
+    alert.innerHTML = `
+        <i class="fas fa-check-circle me-2"></i>${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alert);
+    
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+        alert.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

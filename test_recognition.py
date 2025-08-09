@@ -8,7 +8,7 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), 'tools'))
 
-from audio_tester import AudioRecognitionTester
+from tools.audio_tester import AudioRecognitionTester
 
 def main():
     """Main function for testing recognition."""
@@ -23,7 +23,7 @@ def main():
                 timeout = float(args[timeout_idx + 1])
                 args = args[:timeout_idx] + args[timeout_idx + 2:]
             except ValueError:
-                print("❌ Invalid timeout value. Using default 3.0 seconds.")
+                print("Invalid timeout value. Using default 3.0 seconds.")
     
     config_path = os.path.join('config', 'dejavu_config.json')
     tester = AudioRecognitionTester(config_path, max_listen_time=timeout)

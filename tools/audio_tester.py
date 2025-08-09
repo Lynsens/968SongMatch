@@ -12,6 +12,9 @@ import json
 import signal
 from pathlib import Path
 from typing import Dict, List, Optional, Union
+
+# Add parent directory to path to import from core
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'core'))
 from dejavu_example import AudioFingerprinter
 
 
@@ -38,7 +41,8 @@ class AudioRecognitionTester:
             if stats['num_songs'] == 0:
                 print("⚠️  Warning: Database is empty! Add songs first with:")
                 print("   python quick_start.py add <audio_file>")
-                return False
+                # Still return True to allow web server to start for adding songs
+                return True
             
             return True
         except Exception as e:
@@ -56,26 +60,12 @@ class AudioRecognitionTester:
         timed_out = False
         
         try:
-            # Set up timeout signal (Unix/Linux/macOS only)
-            if hasattr(signal, 'SIGALRM'):
-                signal.signal(signal.SIGALRM, self._timeout_handler)
-                signal.alarm(int(timeout))
-            
+            # Skip signal-based timeout in web context (Flask threads don't support signals)
+            # Just run the function directly - the underlying recognition should be fast enough
             results = recognition_func(*args, **kwargs)
-            
-            # Cancel timeout
-            if hasattr(signal, 'SIGALRM'):
-                signal.alarm(0)
                 
-        except TimeoutError:
-            timed_out = True
-            # Cancel any remaining timeout
-            if hasattr(signal, 'SIGALRM'):
-                signal.alarm(0)
         except Exception as e:
-            # Cancel any remaining timeout for any other exception
-            if hasattr(signal, 'SIGALRM'):
-                signal.alarm(0)
+            # Re-raise any recognition errors
             raise e
         
         processing_time = time.time() - start_time
@@ -150,7 +140,7 @@ class AudioRecognitionTester:
             print(f"     - Audio quality too poor")
             print(f"     - Recording too short (recommend 5+ seconds)")
     
-    def test_file(self, audio_file: str, verbose: bool = True, timeout: Optional[float] = None) -> Optional[Dict]:
+    def test_file(self, audio_file: str, verbose: bool = True, timeout: Optional[float] = None, return_results: bool = False) -> Optional[Dict]:
         """Test recognition with an audio file."""
         if not os.path.exists(audio_file):
             if verbose:
@@ -174,8 +164,13 @@ class AudioRecognitionTester:
         )
         
         # Print and log result
-        self._print_result(result, verbose)
+        if not return_results:
+            self._print_result(result, verbose)
         self.results_log.append(result)
+        
+        if return_results:
+            # For web API, return the results in expected format
+            return results if results else {'song_name': None}
         
         return result
     
@@ -195,9 +190,7 @@ class AudioRecognitionTester:
                 self.fp.recognize_microphone, timeout, duration
             )
         except Exception as e:
-            # Ensure timeout is cleared
-            if hasattr(signal, 'SIGALRM'):
-                signal.alarm(0)
+            # No timeout clearing needed in web context
             
             if verbose:
                 print(f"❌ Microphone error: {e}")
@@ -219,7 +212,7 @@ class AudioRecognitionTester:
         
         return result
     
-    def test_directory(self, directory_path: str, output_file: Optional[str] = None) -> Dict:
+    def test_directory(self, directory_path: str, output_file: Optional[str] = None, return_results: bool = False) -> Dict:
         """Test all audio files in a directory."""
         print(f"📁 Checking directory: {directory_path}")
         
@@ -284,13 +277,19 @@ class AudioRecognitionTester:
             if self.save_results(output_file):
                 print(f"\n💾 Detailed results saved to: {output_file}")
         
-        return {
+        summary = {
             'total_files': len(audio_files),
             'matches': matches,
             'timeouts': timeouts,
             'success_rate': matches/len(audio_files)*100,
             'total_time': total_time
         }
+        
+        if return_results:
+            # For web API, include detailed results
+            summary['detailed_results'] = self.results_log[-len(audio_files):]
+        
+        return summary
     
     def save_results(self, filename: str) -> bool:
         """Save test results to JSON file."""
@@ -322,8 +321,8 @@ class AudioRecognitionTester:
     
     def _clear_timeout(self):
         """Safely clear any remaining timeout signals."""
-        if hasattr(signal, 'SIGALRM'):
-            signal.alarm(0)
+        # No timeout clearing needed in web context (signals don't work in threads)
+        pass
     
     def interactive_mode(self):
         """Interactive mode for testing audio recognition."""

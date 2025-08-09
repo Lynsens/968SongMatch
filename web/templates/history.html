@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Recognition History - Dejavu{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="text-center mb-4">
+            <h1 class="display-4">
+                <i class="fas fa-history text-primary me-3"></i>
+                Recognition History
+            </h1>
+            <p class="lead text-muted">
+                View and manage your audio recognition history
+            </p>
+        </div>
+
+        <!-- History Filter Controls -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="mb-0">
+                            <i class="fas fa-filter me-2"></i>Filter & Search
+                        </h5>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearHistory()">
+                            <i class="fas fa-trash me-1"></i>Clear History
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="searchQuery" placeholder="Search songs..." onkeyup="filterHistory()">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter" onchange="filterHistory()">
+                            <option value="">All Results</option>
+                            <option value="match">Matches Only</option>
+                            <option value="no_match">No Matches</option>
+                            <option value="timeout">Timeouts</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" class="form-control" id="dateFilter" onchange="filterHistory()">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-primary w-100" onclick="refreshHistory()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Stats -->
+        <div class="row mb-4" id="historyStats">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-search fa-2x mb-2"></i>
+                        <h4 id="totalTests">0</h4>
+                        <small>Total Tests</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check fa-2x mb-2"></i>
+                        <h4 id="totalMatches">0</h4>
+                        <small>Matches Found</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-times fa-2x mb-2"></i>
+                        <h4 id="totalNoMatches">0</h4>
+                        <small>No Matches</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-percentage fa-2x mb-2"></i>
+                        <h4 id="successRate">0%</h4>
+                        <small>Success Rate</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Results -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Recognition Results
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="historyContent">
+                    <div class="text-center py-5" id="historyLoading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Loading recognition history...</p>
+                    </div>
+                    
+                    <div class="text-center py-5" id="noHistory" style="display: none;">
+                        <i class="fas fa-search-minus fa-3x text-muted mb-3"></i>
+                        <h5>No Recognition History</h5>
+                        <p class="text-muted">Start recognizing audio files to see results here.</p>
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Recognize Audio
+                        </a>
+                    </div>
+                    
+                    <div id="historyTable" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>File</th>
+                                        <th>Result</th>
+                                        <th>Confidence</th>
+                                        <th>Processing Time</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyTableBody">
+                                    <!-- History items will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <nav id="historyPagination" style="display: none;">
+                            <ul class="pagination justify-content-center">
+                                <!-- Pagination will be populated here -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Result Details Modal -->
+<div class="modal fade" id="resultDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Recognition Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="resultDetailsContent">
+                <!-- Details will be populated here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}
